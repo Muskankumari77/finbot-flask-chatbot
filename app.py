@@ -109,7 +109,7 @@ def get_response(message, history, language, api_key):
         full_prompt = f"{SYSTEM_PROMPT}\n{lang}\n\n{history_text}User: {message}\nAssistant:"
 
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
+            model_name="gemini-2.0-flash",
             generation_config=genai.types.GenerationConfig(
                 temperature=0.4,
                 top_p=0.9,

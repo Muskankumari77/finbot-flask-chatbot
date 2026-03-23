@@ -36,7 +36,7 @@ RULES:
 - Give detailed helpful answers with examples and numbers
 - For loan questions always calculate EMI with table
 - For investment questions show growth examples
-- If asked in Hindi or Hinglish reply in Hindi
+- Always respond in the language specified in the instruction below
 - Always end with: Disclaimer: Consult a qualified financial advisor for personal advice."""
 
 FINANCE_WORDS = [
@@ -72,7 +72,7 @@ def is_finance(text):
 def fallback(message):
     m = message.lower()
     if any(w in m for w in ["hello","hi","hey","namaste","help"]):
-        return "Hello! Main FinBot hoon!\n\nPoochh sakte ho:\n• Loans & EMI\n• Investments & SIP\n• Income Tax\n• Credit Score\n• UPI/NEFT/RTGS\n• Insurance\n• Fixed Deposit"
+        return "Hello! I am FinBot!\n\nYou can ask me about:\n• Loans & EMI\n• Investments & SIP\n• Income Tax\n• Credit Score\n• UPI/NEFT/RTGS\n• Insurance\n• Fixed Deposit"
     if any(w in m for w in ["score","cibil","credit"]):
         return "CIBIL Score:\n• 750-900 = Excellent\n• 700-749 = Good\n• 650-699 = Fair\n• Below 650 = Poor\n\nDisclaimer: Consult a financial advisor."
     if any(w in m for w in ["emi","loan","lakh"]):
@@ -85,7 +85,7 @@ def fallback(message):
         return "FD: 5-7.5% p.a.\nDICGC insures Rs 5 lakh\n\nDisclaimer: Consult a financial advisor."
     if any(w in m for w in ["upi","neft","rtgs"]):
         return "UPI: Rs 1 lakh, instant\nNEFT: 24x7, no minimum\nRTGS: Rs 2 lakh minimum\n\nDisclaimer: Consult a financial advisor."
-    return "Finance aur banking ke baare mein poochho!"
+    return "Please ask about finance and banking topics!"
 
 def get_response(message, history, language, api_key):
     if not api_key or not GROQ_AVAILABLE:
@@ -93,13 +93,14 @@ def get_response(message, history, language, api_key):
     try:
         client = Groq(api_key=api_key)
 
-        lang = ""
-        if language == "hi":
-            lang = "User Hindi ya Hinglish mein poochh raha hai. Simple Hindi ya Hinglish mein jawab do."
+        if language == "hi-lang":
+            lang = "IMPORTANT: You must respond in Hindi language only. No English at all."
         elif language == "fr":
-            lang = "Respond in French."
+            lang = "IMPORTANT: You must respond in French language only."
         elif language == "es":
-            lang = "Respond in Spanish."
+            lang = "IMPORTANT: You must respond in Spanish language only."
+        else:
+            lang = "IMPORTANT: You must respond in English language only. Do not use Hindi or any other language."
 
         msgs = [{"role": "system", "content": SYSTEM_PROMPT + "\n" + lang}]
         for h in history[-6:]:
@@ -132,14 +133,14 @@ def chat():
     api_key = data.get("api_key", "").strip() or os.getenv("LLM_API_KEY", "")
 
     if not message:
-        return jsonify({"response": "Kuch poochho!", "is_finance": True})
+        return jsonify({"response": "Please ask something!", "is_finance": True})
 
     if sid not in sessions:
         sessions[sid] = []
 
     if not is_finance(message):
         return jsonify({
-            "response": "Main sirf Finance aur Banking sawaal answer karta hoon. Loans, EMI, investments, insurance, ya tax ke baare mein poochho!",
+            "response": "I only answer Finance and Banking questions. Please ask about loans, EMI, investments, insurance, or tax!",
             "is_finance": False
         })
 

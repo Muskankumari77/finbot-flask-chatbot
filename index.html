@@ -18,12 +18,7 @@ select { background: #334155; border: 1px solid #475569; color: #e2e8f0; padding
 .status { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #94a3b8; }
 .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; }
 
-/* API Key bar */
-.api-bar { background: #1a2744; padding: 8px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #334155; }
-.api-bar label { font-size: 12px; color: #94a3b8; white-space: nowrap; }
-.api-bar input { flex: 1; background: #0f172a; border: 1px solid #334155; color: #e2e8f0; padding: 5px 10px; border-radius: 6px; font-size: 12px; }
-.api-bar input:focus { outline: none; border-color: #d4a843; }
-.api-save { background: #d4a843; border: none; color: #000; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; }
+
 
 /* Messages */
 .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
@@ -98,12 +93,7 @@ textarea::placeholder { color: #475569; }
   </div>
 </div>
 
-<!-- API Key Bar -->
-<div class="api-bar">
-  <label>🔑 Groq API Key:</label>
-  <input type="password" id="apiKeyInput" placeholder="gsk_... (get free key from console.groq.com/keys)" />
-  <button class="api-save" onclick="saveKey()">Save</button>
-</div>
+
 
 <!-- Messages -->
 <div class="messages" id="messages">
@@ -120,8 +110,7 @@ textarea::placeholder { color: #475569; }
         📋 Income Tax &amp; ITR<br>
         📱 UPI, NEFT, RTGS<br>
         ⭐ Credit Score (CIBIL)<br><br>
-        <strong>Add your Groq API key above for AI responses!</strong><br>
-        Get free key: console.groq.com/keys
+        <strong>Ask me anything about Finance & Banking!</strong>
       </div>
       <div class="time">Just now</div>
     </div>
@@ -161,18 +150,10 @@ function getTime() {
   return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 }
 
-function saveKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (key) {
-    localStorage.setItem('finbot_key', key);
-    addBotMsg('✅ API Key saved! I will now use AI-powered responses.');
-  }
+
 }
 
-function loadKey() {
-  const saved = localStorage.getItem('finbot_key');
-  if (saved) document.getElementById('apiKeyInput').value = saved;
-}
+
 
 function addUserMsg(text) {
   const div = document.createElement('div');
@@ -241,7 +222,7 @@ async function sendMsg() {
   showTyping();
 
   try {
-    const apiKey = document.getElementById('apiKeyInput').value.trim() || localStorage.getItem('finbot_key') || '';
+    const apiKey = '';
     const res = await fetch('/chat', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -272,7 +253,7 @@ async function clearChat() {
   addBotMsg('Chat cleared! Ask me anything about finance and banking.');
 }
 
-loadKey();
+
 </script>
 </body>
 </html>

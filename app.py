@@ -2,10 +2,10 @@ from flask import Flask, request, jsonify, send_file
 import os, re
 
 try:
-    import google.generativeai as genai
-    GEMINI_AVAILABLE = True
+    from groq import Groq
+    GROQ_AVAILABLE = True
 except:
-    GEMINI_AVAILABLE = False
+    GROQ_AVAILABLE = False
 
 app = Flask(__name__)
 sessions = {}
@@ -88,10 +88,10 @@ def fallback(message):
     return "Finance aur banking ke baare mein poochho!"
 
 def get_response(message, history, language, api_key):
-    if not api_key or not GEMINI_AVAILABLE:
+    if not api_key or not GROQ_AVAILABLE:
         return fallback(message)
     try:
-        genai.configure(api_key=api_key)
+        client = Groq(api_key=api_key)
 
         lang = ""
         if language == "hi":
@@ -101,27 +101,22 @@ def get_response(message, history, language, api_key):
         elif language == "es":
             lang = "Respond in Spanish."
 
-        # Build conversation history for Gemini
-        history_text = ""
+        msgs = [{"role": "system", "content": SYSTEM_PROMPT + "\n" + lang}]
         for h in history[-6:]:
-            history_text += f"User: {h['user']}\nAssistant: {h['bot']}\n"
+            msgs.append({"role": "user", "content": h["user"]})
+            msgs.append({"role": "assistant", "content": h["bot"]})
+        msgs.append({"role": "user", "content": message})
 
-        full_prompt = f"{SYSTEM_PROMPT}\n{lang}\n\n{history_text}User: {message}\nAssistant:"
-
-        model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
-            generation_config=genai.types.GenerationConfig(
-                temperature=0.4,
-                top_p=0.9,
-                max_output_tokens=1000,
-            )
+        res = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=msgs,
+            temperature=0.4,
+            top_p=0.9,
+            max_tokens=1000
         )
-
-        response = model.generate_content(full_prompt)
-        return response.text
-
+        return res.choices[0].message.content
     except Exception as e:
-        print(f"Gemini Error: {e}")
+        print(f"Groq Error: {e}")
         return fallback(message)
 
 @app.route("/")
